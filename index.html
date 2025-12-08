@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Research Mission Control</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --bg-color: #050505;
+        --card-bg: rgba(20, 30, 40, 0.7);
+        --primary-neon: #00f3ff; /* Cyan */
+        --secondary-neon: #ff0055; /* Pink/Red */
+        --accent-neon: #ffee00; /* Yellow */
+        --text-color: #e0fbfc;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg-color);
+        background-image: linear-gradient(
+            rgba(0, 243, 255, 0.03) 1px,
+            transparent 1px
+          ),
+          linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+        font-family: "Share Tech Mono", monospace;
+        color: var(--text-color);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow-x: hidden;
+      }
+
+      /* Ambient background glow */
+      body::before {
+        content: "";
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80vw;
+        height: 80vh;
+        background: radial-gradient(
+          circle,
+          rgba(0, 243, 255, 0.05) 0%,
+          transparent 70%
+        );
+        z-index: -1;
+        pointer-events: none;
+      }
+
+      h1 {
+        text-transform: uppercase;
+        font-size: 2.5rem;
+        letter-spacing: 5px;
+        text-shadow: 0 0 10px var(--primary-neon);
+        margin-bottom: 3rem;
+        border-bottom: 2px solid var(--primary-neon);
+        padding-bottom: 10px;
+      }
+
+      .deadline-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        width: 90%;
+        max-width: 1400px;
+        padding-bottom: 50px;
+      }
+
+      /* The Unique Card Design */
+      .mission-card {
+        background: var(--card-bg);
+        border: 1px solid rgba(0, 243, 255, 0.3);
+        padding: 20px;
+        position: relative;
+        /* Sci-Fi "Cut corner" shape */
+        clip-path: polygon(
+          20px 0,
+          100% 0,
+          100% calc(100% - 20px),
+          calc(100% - 20px) 100%,
+          0 100%,
+          0 20px
+        );
+        transition: all 0.3s ease;
+        backdrop-filter: blur(5px);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .mission-card:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+        border-color: var(--primary-neon);
+      }
+
+      /* Decorative decorative bits on the card */
+      .mission-card::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 20px;
+        height: 20px;
+        background: var(--primary-neon);
+        clip-path: polygon(0 100%, 100% 100%, 100% 0);
+        pointer-events: none; /* Allows clicking links behind it if necessary */
+      }
+
+      .mission-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+      }
+
+      .mission-id {
+        color: var(--primary-neon);
+        font-size: 0.9rem;
+        opacity: 0.8;
+      }
+
+      .mission-title {
+        font-size: 1.5rem;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .dates-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+
+      .date-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px;
+        background: rgba(0, 0, 0, 0.3);
+        border-left: 3px solid transparent;
+        transition: 0.3s;
+      }
+
+      /* Color coding the specific date types */
+      .date-row.submission {
+        border-left-color: var(--primary-neon);
+      }
+      .date-row.registration {
+        border-left-color: var(--accent-neon);
+      }
+      .date-row.presentation {
+        border-left-color: var(--secondary-neon);
+      }
+
+      .date-label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+
+      .date-value {
+        font-size: 1.1rem;
+        font-weight: bold;
+        letter-spacing: 1px;
+      }
+
+      /* NEW LINK BUTTON STYLES */
+      .mission-link {
+        display: block;
+        margin-top: auto; /* Pushes button to bottom before status bar */
+        margin-bottom: 15px;
+        text-align: center;
+        background: rgba(0, 243, 255, 0.1);
+        border: 1px solid var(--primary-neon);
+        color: var(--primary-neon);
+        padding: 8px;
+        text-decoration: none;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 2px;
+        transition: all 0.2s ease-in-out;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .mission-link:hover {
+        background: var(--primary-neon);
+        color: #000;
+        box-shadow: 0 0 15px var(--primary-neon);
+        font-weight: bold;
+      }
+
+      .mission-link::before {
+        content: "> ";
+      }
+
+      .status-bar {
+        height: 4px;
+        background: #333;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .status-fill {
+        height: 100%;
+        width: 40%;
+        background: var(--primary-neon);
+        box-shadow: 0 0 10px var(--primary-neon);
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          opacity: 0.6;
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0.6;
+        }
+      }
+
+      /* Glitch effect on hover for title */
+      .mission-card:hover .mission-title {
+        animation: glitch 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both
+          infinite;
+        color: var(--primary-neon);
+      }
+
+      @keyframes glitch {
+        0% {
+          transform: translate(0);
+        }
+        20% {
+          transform: translate(-2px, 2px);
+        }
+        40% {
+          transform: translate(-2px, -2px);
+        }
+        60% {
+          transform: translate(2px, 2px);
+        }
+        80% {
+          transform: translate(2px, -2px);
+        }
+        100% {
+          transform: translate(0);
+        }
+      }
+
+      @media (max-width: 600px) {
+        h1 {
+          font-size: 1.8rem;
+        }
+        .deadline-container {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Upcoming Deadlines</h1>
+
+    <div class="deadline-container">
+      <div class="mission-card">
+        <div class="mission-header">
+          <span class="mission-title">NKU-Poster-at-Capitol</span>
+          <span class="mission-id">4156</span>
+        </div>
+        <div class="dates-grid">
+          <div class="date-row submission">
+            <span class="date-label">Submission</span>
+            <span class="date-value">2025-12-21</span>
+          </div>
+          <div class="date-row presentation">
+            <span class="date-label">Notification</span>
+            <span class="date-value">2026-01-30</span>
+          </div>
+        </div>
+
+        <a
+          href="https://digitalcommons.murraystate.edu/cgi/myaccount.cgi?context="
+          target="_blank"
+          class="mission-link"
+          >Link</a
+        >
+
+        <div class="status-bar">
+          <div class="status-fill" style="width: 20%"></div>
+        </div>
+      </div>
+
+      <div class="mission-card">
+        <div class="mission-header">
+          <span class="mission-title">ICCAI-Hackathon-Zhou</span>
+          <span class="mission-id">NA0104 - Japan</span>
+        </div>
+        <div class="dates-grid">
+          <div class="date-row submission">
+            <span class="date-label">Abstract</span>
+            <span class="date-value">Submitted</span>
+          </div>
+          <div class="date-row registration">
+            <span class="date-label">Notification</span>
+            <span class="date-value">2026-01-15</span>
+          </div>
+          <div class="date-row registration">
+            <span class="date-label">Registration</span>
+            <span class="date-value">2026-02-15</span>
+          </div>
+          <div class="date-row presentation">
+            <span class="date-label">Presentation</span>
+            <span class="date-value">2026-04-24</span>
+          </div>
+        </div>
+
+        <a
+          href="https://www.iccai.net/index.html"
+          target="_blank"
+          class="mission-link"
+          >Conference Link</a
+        >
+        <a
+          href="https://confsys.iconf.org/home/index.html"
+          target="_blank"
+          class="mission-link"
+          >Submission Link</a
+        >
+        <div class="status-bar">
+          <div class="status-fill" style="width: 80%"></div>
+        </div>
+      </div>
+
+      <div class="mission-card">
+        <div class="mission-header">
+          <span class="mission-title">ICSADL</span>
+          <span class="mission-id">Prasanna</span>
+        </div>
+        <div class="dates-grid">
+          <div class="date-row submission">
+            <span class="date-label">Full Paper</span>
+            <span class="date-value">2025-12-13</span>
+          </div>
+          <div class="date-row registration">
+            <span class="date-label">Decision Notificaiton</span>
+            <span class="date-value">2026-01-03</span>
+          </div>
+          <div class="date-row registration">
+            <span class="date-label">Registration Deadline</span>
+            <span class="date-value">2026-01-20</span>
+          </div>
+          <div class="date-row presentation">
+            <span class="date-label">Presentation</span>
+            <span class="date-value">2026-02-18</span>
+          </div>
+        </div>
+
+        <a href="https://icsadl.com/" target="_blank" class="mission-link"
+          >Link</a
+        >
+
+        <div class="status-bar">
+          <div class="status-fill" style="width: 10%"></div>
+        </div>
+      </div>
+
+      <div class="mission-card">
+        <div class="mission-header">
+          <span class="mission-title">WDSI</span>
+          <span class="mission-id">AI JOB Analysis - Canada</span>
+        </div>
+        <div class="dates-grid">
+          <div class="date-row submission">
+            <span class="date-label">Registration</span>
+            <span class="date-value">2026-01-25</span>
+          </div>
+          <div class="date-row registration">
+            <span class="date-label">Submission</span>
+            <span class="date-value">2026-01-25</span>
+          </div>
+          <div class="date-row presentation">
+            <span class="date-label">Presentation</span>
+            <span class="date-value">2026-03-31-</span>
+          </div>
+        </div>
+        <a
+          href="https://wdsi.decisionsciences.org/about/"
+          target="_blank"
+          class="mission-link"
+          >Conference Link</a
+        >
+
+        <a
+          href="https://app.oxfordabstracts.com/dashboard/events/75645"
+          target="_blank"
+          class="mission-link"
+          >Submission Link</a
+        >
+        <div class="status-bar">
+          <div class="status-fill" style="width: 45%"></div>
+        </div>
+      </div>
+
+      <div class="mission-card">
+        <div class="mission-header">
+          <span class="mission-title">Edunine</span>
+          <span class="mission-id">OBJ_05</span>
+        </div>
+        <div class="dates-grid">
+          <div class="date-row submission">
+            <span class="date-label">Submission</span>
+            <span class="date-value">2025-11-11</span>
+          </div>
+          <div class="date-row registration">
+            <span class="date-label">Notificaiton</span>
+            <span class="date-value">2026-12-20</span>
+          </div>
+          <div class="date-row registration">
+            <span class="date-label">Registration</span>
+            <span class="date-value">2026-02-15</span>
+          </div>
+          <div class="date-row presentation">
+            <span class="date-label">Final Paper</span>
+            <span class="date-value">Not mentioned. Talk to Ankur</span>
+          </div>
+          <div class="date-row presentation">
+            <span class="date-label">Conference</span>
+            <span class="date-value">2026-03-8</span>
+          </div>
+        </div>
+
+        <a
+          href="https://edunine.eu/edunine2026/eng/index.php"
+          target="_blank"
+          class="mission-link"
+          >Conference Link</a
+        >
+        <a
+          href="https://easychair.org/my2/conference?conf=edunine2026"
+          target="_blank"
+          class="mission-link"
+          >Submission Link</a
+        >
+        <div class="status-bar">
+          <div class="status-fill" style="width: 5%"></div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
